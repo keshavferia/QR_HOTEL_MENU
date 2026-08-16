@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Grand Hotel - Digital Menu</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="menu-container">
+
+
+    <!-- HOTEL HEADER -->
+
+    <header class="hotel-header">
+
+        <div class="hotel-logo">
+            🍽️
+        </div>
+
+        <h1>Grand Hotel</h1>
+
+        <p>Welcome to our Digital Menu</p>
+
+    </header>
+
+
+    <!-- SEARCH -->
+
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="foodSearch"
+            placeholder="🔍 Search food..."
+        >
+
+    </div>
+
+
+    <!-- CATEGORIES -->
+
+    <div class="category-buttons">
+
+        <button
+            type="button"
+            class="category-button active"
+            data-category="all"
+        >
+            All
+        </button>
+
+
+        {% set categories = [] %}
+
+        {% for food in foods %}
+
+            {% if food["category"] not in categories %}
+
+                {% set _ = categories.append(food["category"]) %}
+
+                <button
+                    type="button"
+                    class="category-button"
+                    data-category="{{ food['category'] }}"
+                >
+                    {{ food["category"] }}
+                </button>
+
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- FOOD LIST -->
+
+    <div id="foodList">
+
+        {% if foods %}
+
+            {% for food in foods %}
+
+            <div
+                class="food-item"
+                data-name="{{ food['name']|lower }}"
+                data-category="{{ food['category'] }}"
+            >
+
+
+                <!-- FOOD IMAGE -->
+
+                {% if food["image"] %}
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename='images/' + food['image']
+                        ) }}"
+                        alt="{{ food['name'] }}"
+                    >
+
+                {% else %}
+
+                    <div class="no-image">
+                        🍽️
+                    </div>
+
+                {% endif %}
+
+
+                <!-- FOOD INFORMATION -->
+
+                <div class="food-info">
+
+                    <h3>
+                        {{ food["name"] }}
+                    </h3>
+
+                    <p>
+                        {{ food["description"] }}
+                    </p>
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <strong>
+                    ₹{{ food["price"] }}
+                </strong>
+
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-message">
+
+                <h3>🍽️ Menu is Empty</h3>
+
+                <p>
+                    Please check again later.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            Thank you for visiting ❤️
+        </p>
+
+    </footer>
+
+
+</div>
+
+
+<script>
+
+    const searchInput = document.getElementById("foodSearch");
+
+    const categoryButtons =
+        document.querySelectorAll(".category-button");
+
+    const foodItems =
+        document.querySelectorAll(".food-item");
+
+
+    let selectedCategory = "all";
+
+
+    function updateMenu() {
+
+        const searchText =
+            searchInput.value.toLowerCase().trim();
+
+
+        foodItems.forEach(function(item) {
+
+            const foodName =
+                item.dataset.name.toLowerCase();
+
+            const foodCategory =
+                item.dataset.category;
+
+
+            const matchesSearch =
+                foodName.includes(searchText);
+
+
+            const matchesCategory =
+                selectedCategory === "all" ||
+                foodCategory === selectedCategory;
+
+
+            if (matchesSearch && matchesCategory) {
+
+                item.style.display = "flex";
+
+            } else {
+
+                item.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+    searchInput.addEventListener("input", function() {
+
+        updateMenu();
+
+    });
+
+
+    categoryButtons.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            selectedCategory =
+                button.dataset.category;
+
+
+            categoryButtons.forEach(function(btn) {
+
+                btn.classList.remove("active");
+
+            });
+
+
+            button.classList.add("active");
+
+
+            updateMenu();
+
+        });
+
+    });
+
+</script>
+
+
+</body>
+
+</html>

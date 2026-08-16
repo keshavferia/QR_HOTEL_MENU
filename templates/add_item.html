@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Food Item</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <header class="dashboard-header">
+
+        <div>
+            <h1>🍽️ Add Food Item</h1>
+            <p>Hotel Menu Admin</p>
+        </div>
+
+        <a href="/dashboard" class="view-menu">
+            ← Dashboard
+        </a>
+
+    </header>
+
+
+    <section class="dashboard-card">
+
+        <h2>Add New Food</h2>
+
+
+        <form method="POST"
+              enctype="multipart/form-data">
+
+
+            <label>Food Name</label>
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Example: Chicken Biryani"
+                required
+            >
+
+
+            <label>Category</label>
+
+            <input
+                type="text"
+                name="category"
+                placeholder="Example: Indian Food"
+                required
+            >
+
+
+            <label>Description</label>
+
+            <textarea
+                name="description"
+                placeholder="Describe your food..."
+                rows="4"
+            ></textarea>
+
+
+            <label>Price (₹)</label>
+
+            <input
+                type="number"
+                name="price"
+                placeholder="180"
+                min="0"
+                step="0.01"
+                required
+            >
+
+
+            <label>Food Image</label>
+
+            <input
+                type="file"
+                name="image"
+                accept="image/*"
+            >
+
+
+            <button
+                type="submit"
+                class="add-button">
+
+                💾 Save Food Item
+
+            </button>
+
+        </form>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>

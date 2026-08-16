@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hotel Menu Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="dashboard-header">
+
+        <div>
+
+            <h1>🏨 Grand Hotel</h1>
+
+            <p>Admin Dashboard</p>
+
+        </div>
+
+
+        <div class="dashboard-header-actions">
+
+            <a
+                href="/menu"
+                class="view-menu"
+            >
+                👀 View Menu
+            </a>
+
+
+            <a
+                href="/generate-qr"
+                class="view-menu"
+            >
+                📱 Generate QR
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================
+         FOOD MANAGEMENT
+    ========================== -->
+
+    <section class="dashboard-card">
+
+
+        <div class="dashboard-title">
+
+            <div>
+
+                <h2>🍽️ Food Items</h2>
+
+                <p>
+                    Manage your hotel menu
+                </p>
+
+            </div>
+
+
+            <a
+                href="/add-item"
+                class="add-button"
+            >
+                ➕ Add Food
+            </a>
+
+        </div>
+
+
+
+        <!-- =========================
+             FOOD LIST
+        ========================== -->
+
+        {% if foods %}
+
+        <div class="food-list">
+
+
+            {% for food in foods %}
+
+
+            <div class="admin-food-item">
+
+
+                <!-- FOOD IMAGE -->
+
+                {% if food["image"] %}
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='images/' + food['image']
+                    ) }}"
+                    alt="{{ food['name'] }}"
+                >
+
+                {% else %}
+
+                <div class="no-image">
+                    🍽️
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- FOOD INFORMATION -->
+
+                <div class="admin-food-info">
+
+                    <h3>
+                        {{ food["name"] }}
+                    </h3>
+
+
+                    <p>
+                        {{ food["category"] }}
+                    </p>
+
+
+                    {% if food["description"] %}
+
+                    <small>
+                        {{ food["description"] }}
+                    </small>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- PRICE -->
+
+                <strong>
+
+                    ₹{{ food["price"] }}
+
+                </strong>
+
+
+
+                <!-- ACTIONS -->
+
+                <div class="admin-actions">
+
+
+                    <!-- AVAILABLE / UNAVAILABLE -->
+
+                    <form
+                        method="POST"
+                        action="/toggle-item/{{ food['id'] }}"
+                    >
+
+                        {% if food["available"] %}
+
+                        <button
+                            type="submit"
+                            class="available-button"
+                        >
+                            🟢 Available
+                        </button>
+
+                        {% else %}
+
+                        <button
+                            type="submit"
+                            class="unavailable-button"
+                        >
+                            🔴 Unavailable
+                        </button>
+
+                        {% endif %}
+
+                    </form>
+
+
+
+                    <!-- EDIT -->
+
+                    <a
+                        href="/edit-item/{{ food['id'] }}"
+                        class="edit-button"
+                    >
+                        ✏️ Edit
+                    </a>
+
+
+
+                    <!-- DELETE -->
+
+                    <form
+                        method="POST"
+                        action="/delete-item/{{ food['id'] }}"
+                        onsubmit="return confirm('Are you sure you want to delete this food item?');"
+                    >
+
+                        <button
+                            type="submit"
+                            class="delete-button"
+                        >
+                            🗑️ Delete
+                        </button>
+
+                    </form>
+
+
+                </div>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+        {% else %}
+
+
+        <!-- EMPTY MENU -->
+
+        <div class="empty-message">
+
+            <h3>
+                🍽️ No Food Items Yet
+            </h3>
+
+            <p>
+                Add your first food item to create your menu.
+            </p>
+
+            <br>
+
+            <a
+                href="/add-item"
+                class="add-button"
+            >
+                ➕ Add Food
+            </a>
+
+        </div>
+
+
+        {% endif %}
+
+
+    </section>
+
+
+
+    <!-- =========================
+         QR CODE SECTION
+    ========================== -->
+
+    <section class="dashboard-card qr-card">
+
+        <h2>
+            📱 Hotel Menu QR Code
+        </h2>
+
+        <p>
+            Customers can scan this QR code
+            to open the digital menu.
+        </p>
+
+
+        <div class="qr-section">
+
+
+            <!-- QR IMAGE -->
+
+            <div class="qr-image-box">
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='qr/hotel_menu_qr.png'
+                    ) }}"
+                    alt="Hotel Menu QR Code"
+                >
+
+            </div>
+
+
+            <!-- QR INFORMATION -->
+
+            <div class="qr-info">
+
+                <h3>
+                    Scan to View Menu
+                </h3>
+
+                <p>
+                    Place this QR code on hotel
+                    tables, reception or menu cards.
+                </p>
+
+
+                <a
+                    href="/generate-qr"
+                    class="add-button"
+                >
+                    🔄 Generate New QR
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <p>
+            Grand Hotel Digital Menu
+        </p>
+
+    </footer>
+
+
+</div>
+
+</body>
+
+</html>
