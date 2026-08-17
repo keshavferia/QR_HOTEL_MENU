@@ -61,7 +61,7 @@ QR_FOLDER = os.path.join(
 
 PUBLIC_URL = os.environ.get(
     "PUBLIC_URL",
-    "https://qr-hotel-menu.onrender.com"
+    PUBLIC_URL = os.environ.get("PUBLIC_URL", "")
 )
 
 
