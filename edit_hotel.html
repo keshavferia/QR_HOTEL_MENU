@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit {{ hotel["name"] }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 6px 0 15px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        img {
+            max-width: 120px;
+            max-height: 120px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>✏️ Edit Hotel</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Hotel Name</label>
+        <input
+            type="text"
+            name="hotel_name"
+            value="{{ hotel['name'] }}"
+            required
+        >
+        <label>Hotel Logo</label>
+        {% if hotel["logo"] %}
+            <br>
+            <img
+                src="{{ url_for(
+                    'static',
+                    filename='images/' + hotel['logo']
+                ) }}"
+                alt="Hotel Logo"
+            >
+            <br>
+        {% endif %}
+        <input
+            type="file"
+            name="logo"
+            accept="image/*"
+        >
+        <label>Address</label>
+        <input
+            type="text"
+            name="address"
+            value="{{ hotel['address'] or '' }}"
+        >
+        <label>Phone</label>
+        <input
+            type="text"
+            name="phone"
+            value="{{ hotel['phone'] or '' }}"
+        >
+        <label>Email</label>
+        <input
+            type="email"
+            name="email"
+            value="{{ hotel['email'] or '' }}"
+        >
+        <button type="submit">
+            💾 Save Changes
+        </button>
+    </form>
+    <br>
+    <a href="{{ url_for('super_admin') }}">
+        ← Back to Super Admin
+    </a>
+</div>
+</body>
+</html>

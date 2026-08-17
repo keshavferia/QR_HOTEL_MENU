@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Your Cart</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px 15px 40px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .cart-item {
+            background: white;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,.08);
+        }
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .size {
+            color: #666;
+            margin-top: 5px;
+        }
+        .price {
+            color: #15803d;
+            font-weight: bold;
+            margin-top: 7px;
+        }
+        .quantity {
+            width: 70px;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        button,
+        .btn {
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .update {
+            background: #2563eb;
+        }
+        .remove {
+            background: #dc2626;
+        }
+        .clear {
+            background: #6b7280;
+        }
+        .back {
+            background: #111827;
+        }
+        .total {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .empty {
+            background: white;
+            padding: 35px;
+            text-align: center;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🛒 Your Cart</h1>
+    {% if cart %}
+        <form
+            method="POST"
+            action="{{ url_for('update_cart') }}"
+        >
+            {% for item in cart %}
+                {% set item_index = loop.index0 %}
+                <div class="cart-item">
+                    <div class="item-name">
+                        {{ item.item_name }}
+                    </div>
+                    <div class="size">
+                        {{ item.size_name }}
+                    </div>
+                    <div class="price">
+                        ₹{{ "%.2f"|format(item.price) }}
+                    </div>
+                    <input
+                        class="quantity"
+                        type="number"
+                        min="1"
+                        name="{{ item.item_id }}_{{ item.size_name }}"
+                        value="{{ item.quantity }}"
+                    >
+                    <div style="margin-top:12px;">
+                        <button
+                            type="submit"
+                            class="update"
+                        >
+                            Update
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </form>
+        <div class="total">
+            Total:
+            ₹{{ "%.2f"|format(total) }}
+        </div>
+        <div style="margin-top:15px;">
+            <form
+                method="POST"
+                action="{{ url_for('clear_cart') }}"
+                style="display:inline;"
+            >
+                <button
+                    type="submit"
+                    class="clear"
+                >
+                    Clear Cart
+                </button>
+            </form>
+            <a
+                href="javascript:history.back()"
+                class="btn back"
+            >
+                ← Back to Menu
+            </a>
+        </div>
+    {% else %}
+        <div class="empty">
+            <h2>
+                Cart is Empty
+            </h2>
+            <p>
+                Menu se kuch items add karo.
+            </p>
+            <a
+                href="javascript:history.back()"
+                class="btn back"
+            >
+                ← Back to Menu
+            </a>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

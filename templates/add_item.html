@@ -5,106 +5,294 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Add Food Item</title>
+    <title>
+        Add Menu Item
+    </title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+
+            box-shadow:
+                0 2px 10px
+                rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .price-box {
+            background: #f1f5f9;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .price-box h3 {
+            margin-top: 0;
+        }
+
+        .button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 22px;
+
+            background: #16a34a;
+            color: white;
+
+            border: none;
+            border-radius: 8px;
+
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #15803d;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 18px;
+            text-decoration: none;
+            color: #2563eb;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px auto;
+                padding: 20px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
 <body>
 
-<div class="dashboard-container">
 
-    <header class="dashboard-header">
+<div class="container">
 
-        <div>
-            <h1>🍽️ Add Food Item</h1>
-            <p>Hotel Menu Admin</p>
+
+    <h1>
+        ➕ Add Menu Item
+    </h1>
+
+
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
         </div>
 
-        <a href="/dashboard" class="view-menu">
-            ← Dashboard
-        </a>
-
-    </header>
+    {% endif %}
 
 
-    <section class="dashboard-card">
-
-        <h2>Add New Food</h2>
-
-
-        <form method="POST"
-              enctype="multipart/form-data">
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
 
 
-            <label>Food Name</label>
+        <!-- ITEM NAME -->
 
-            <input
-                type="text"
-                name="name"
-                placeholder="Example: Chicken Biryani"
-                required
-            >
+        <label>
+            Item Name
+        </label>
 
-
-            <label>Category</label>
-
-            <input
-                type="text"
-                name="category"
-                placeholder="Example: Indian Food"
-                required
-            >
+        <input
+            type="text"
+            name="name"
+            placeholder="Example: Chicken Biryani"
+            required
+        >
 
 
-            <label>Description</label>
+        <!-- CATEGORY -->
 
-            <textarea
-                name="description"
-                placeholder="Describe your food..."
-                rows="4"
-            ></textarea>
+        <label>
+            Category
+        </label>
+
+        <input
+            type="text"
+            name="category"
+            placeholder="Example: Main Course"
+        >
 
 
-            <label>Price (₹)</label>
+        <!-- DESCRIPTION -->
+
+        <label>
+            Description
+        </label>
+
+        <textarea
+            name="description"
+            rows="4"
+            placeholder="Item description"
+        ></textarea>
+
+
+        <!-- IMAGE -->
+
+        <label>
+            Food Image
+        </label>
+
+        <input
+            type="file"
+            name="image"
+            accept="image/*"
+        >
+
+
+        <!-- PRICES -->
+
+        <div class="price-box">
+
+            <h3>
+                💰 Item Prices
+            </h3>
+
+
+            <label>
+                Regular Price
+            </label>
 
             <input
                 type="number"
-                name="price"
-                placeholder="180"
-                min="0"
                 step="0.01"
-                required
+                min="0"
+                name="regular_price"
+                placeholder="Example: 150"
             >
 
 
-            <label>Food Image</label>
+            <label>
+                Small Price
+            </label>
 
             <input
-                type="file"
-                name="image"
-                accept="image/*"
+                type="number"
+                step="0.01"
+                min="0"
+                name="small_price"
+                placeholder="Example: 120"
             >
 
 
-            <button
-                type="submit"
-                class="add-button">
+            <label>
+                Medium Price
+            </label>
 
-                💾 Save Food Item
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="medium_price"
+                placeholder="Example: 180"
+            >
 
-            </button>
 
-        </form>
+            <label>
+                Large Price
+            </label>
 
-    </section>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="large_price"
+                placeholder="Example: 250"
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="button"
+        >
+            ➕ Add Item
+        </button>
+
+
+    </form>
+
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="back"
+    >
+        ← Back to Dashboard
+    </a>
+
 
 </div>
+
 
 </body>
 

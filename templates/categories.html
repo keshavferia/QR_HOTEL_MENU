@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ hotel.name }} - Categories
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+            background: #374151;
+            padding: 9px 15px;
+            border-radius: 6px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .hotel-header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .hotel-header h1 {
+            margin: 0 0 8px 0;
+        }
+
+        .hotel-header p {
+            margin: 0;
+            color: #666;
+        }
+
+        .add-box {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .add-box h3 {
+            margin-top: 0;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .add-form input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        .btn {
+            border: none;
+            padding: 11px 17px;
+            border-radius: 7px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background: #16a34a;
+        }
+
+        .category-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .category-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .category-info h3 {
+            margin: 0 0 5px 0;
+        }
+
+        .category-info p {
+            margin: 0;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn {
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+        }
+
+        .edit-form {
+            display: none;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .edit-form input {
+            padding: 10px;
+            width: calc(100% - 130px);
+            max-width: 500px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+        }
+
+        .save-btn {
+            background: #16a34a;
+        }
+
+        .cancel-btn {
+            background: #6b7280;
+        }
+
+        .empty {
+            background: white;
+            padding: 35px;
+            text-align: center;
+            border-radius: 12px;
+            color: #777;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 600px) {
+            .category-card {
+                align-items: flex-start;
+            }
+
+            .edit-form input {
+                width: 100%;
+                max-width: none;
+                box-sizing: border-box;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+    <h2>
+        Category Management
+    </h2>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="back">
+        ← Dashboard
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <!-- HOTEL INFORMATION -->
+
+    <div class="hotel-header">
+
+        <h1>
+            {{ hotel.name }}
+        </h1>
+
+        <p>
+            Manage categories for this hotel only.
+        </p>
+
+    </div>
+
+
+    <!-- ADD CATEGORY -->
+
+    <div class="add-box">
+
+        <h3>
+            Add New Category
+        </h3>
+
+        <form
+            method="POST"
+            action="{{ url_for('add_category', hotel_id=hotel.id) }}"
+            class="add-form">
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Example: Starters"
+                required>
+
+            <button
+                type="submit"
+                class="btn btn-add">
+                + Add Category
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- CATEGORY LIST -->
+
+    {% if categories %}
+
+        <div class="category-list">
+
+            {% for category in categories %}
+
+                <div class="category-card">
+
+                    <div class="category-info">
+
+                        <h3>
+                            {{ category.name }}
+                        </h3>
+
+                        <p>
+                            Category ID: {{ category.id }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button
+                            type="button"
+                            class="btn edit-btn"
+                            onclick="showEdit({{ category.id }})">
+                            Edit
+                        </button>
+
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_category', category_id=category.id) }}"
+                            onsubmit="return confirm('Delete this category?');"
+                            style="display:inline;">
+
+                            <button
+                                type="submit"
+                                class="btn delete-btn">
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- EDIT FORM -->
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('edit_category', category_id=category.id) }}"
+                        class="edit-form"
+                        id="edit-{{ category.id }}">
+
+                        <input
+                            type="text"
+                            name="name"
+                            value="{{ category.name }}"
+                            required>
+
+                        <button
+                            type="submit"
+                            class="btn save-btn">
+                            Save
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn cancel-btn"
+                            onclick="hideEdit({{ category.id }})">
+                            Cancel
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+
+            <h3>
+                No Categories Yet
+            </h3>
+
+            <p>
+                Is hotel ke liye abhi koi category nahi bani hai.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function showEdit(id) {
+
+    const form = document.getElementById("edit-" + id);
+
+    if (form) {
+        form.style.display = "block";
+    }
+}
+
+
+function hideEdit(id) {
+
+    const form = document.getElementById("edit-" + id);
+
+    if (form) {
+        form.style.display = "none";
+    }
+}
+
+</script>
+
+</body>
+</html>

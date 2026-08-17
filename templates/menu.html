@@ -1,270 +1,467 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Grand Hotel - Digital Menu</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
-
-</head>
-
-<body>
-
-<div class="menu-container">
-
-
-    <!-- HOTEL HEADER -->
-
-    <header class="hotel-header">
-
-        <div class="hotel-logo">
-            🍽️
-        </div>
-
-        <h1>Grand Hotel</h1>
-
-        <p>Welcome to our Digital Menu</p>
-
-    </header>
-
-
-    <!-- SEARCH -->
-
-    <div class="search-box">
-
-        <input
-            type="text"
-            id="foodSearch"
-            placeholder="🔍 Search food..."
-        >
-
-    </div>
-
-
-    <!-- CATEGORIES -->
-
-    <div class="category-buttons">
-
-        <button
-            type="button"
-            class="category-button active"
-            data-category="all"
-        >
-            All
-        </button>
-
-
-        {% set categories = [] %}
-
-        {% for food in foods %}
-
-            {% if food["category"] not in categories %}
-
-                {% set _ = categories.append(food["category"]) %}
-
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="{{ food['category'] }}"
-                >
-                    {{ food["category"] }}
-                </button>
-
-            {% endif %}
-
-        {% endfor %}
-
-    </div>
-
-
-    <!-- FOOD LIST -->
-
-    <div id="foodList">
-
-        {% if foods %}
-
-            {% for food in foods %}
-
-            <div
-                class="food-item"
-                data-name="{{ food['name']|lower }}"
-                data-category="{{ food['category'] }}"
-            >
-
-
-                <!-- FOOD IMAGE -->
-
-                {% if food["image"] %}
-
-                    <img
-                        src="{{ url_for(
-                            'static',
-                            filename='images/' + food['image']
-                        ) }}"
-                        alt="{{ food['name'] }}"
-                    >
-
-                {% else %}
-
-                    <div class="no-image">
-                        🍽️
-                    </div>
-
-                {% endif %}
-
-
-                <!-- FOOD INFORMATION -->
-
-                <div class="food-info">
-
-                    <h3>
-                        {{ food["name"] }}
-                    </h3>
-
-                    <p>
-                        {{ food["description"] }}
-                    </p>
-
-                </div>
-
-
-                <!-- PRICE -->
-
-                <strong>
-                    ₹{{ food["price"] }}
-                </strong>
-
-
-            </div>
-
-            {% endfor %}
-
-        {% else %}
-
-            <div class="empty-message">
-
-                <h3>🍽️ Menu is Empty</h3>
-
-                <p>
-                    Please check again later.
-                </p>
-
-            </div>
-
-        {% endif %}
-
-    </div>
-
-
-    <!-- FOOTER -->
-
-    <footer>
-
-        <p>
-            Thank you for visiting ❤️
-        </p>
-
-    </footer>
-
-
-</div>
-
-
-<script>
-
-    const searchInput = document.getElementById("foodSearch");
-
-    const categoryButtons =
-        document.querySelectorAll(".category-button");
-
-    const foodItems =
-        document.querySelectorAll(".food-item");
-
-
-    let selectedCategory = "all";
-
-
-    function updateMenu() {
-
-        const searchText =
-            searchInput.value.toLowerCase().trim();
-
-
-        foodItems.forEach(function(item) {
-
-            const foodName =
-                item.dataset.name.toLowerCase();
-
-            const foodCategory =
-                item.dataset.category;
-
-
-            const matchesSearch =
-                foodName.includes(searchText);
-
-
-            const matchesCategory =
-                selectedCategory === "all" ||
-                foodCategory === selectedCategory;
-
-
-            if (matchesSearch && matchesCategory) {
-
-                item.style.display = "flex";
-
-            } else {
-
-                item.style.display = "none";
-
+    <title>
+        {{ hotel.name }} - Menu
+    </title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            color: #222;
+        }
+        /* =========================
+           HEADER
+        ========================= */
+        .header {
+            background: #111827;
+            color: white;
+            padding: 25px 18px;
+            text-align: center;
+        }
+        .hotel-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: white;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            margin: 5px 0 8px;
+        }
+        .header p {
+            margin: 5px 0;
+            opacity: 0.85;
+        }
+        /* =========================
+           CONTAINER
+        ========================= */
+        .container {
+            max-width: 1050px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+        /* =========================
+           SEARCH
+        ========================= */
+        .search-box {
+            margin-bottom: 28px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .search-box input:focus {
+            border-color: #16a34a;
+        }
+        /* =========================
+           CATEGORY
+        ========================= */
+        .category {
+            margin-bottom: 38px;
+        }
+        .category-title {
+            font-size: 26px;
+            margin: 0 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #16a34a;
+        }
+        /* =========================
+           ITEMS
+        ========================= */
+        .items {
+            display: grid;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(260px, 1fr)
+                );
+            gap: 18px;
+        }
+        .item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 2px 10px
+                rgba(0,0,0,0.08);
+        }
+        .item-image {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            display: block;
+        }
+        .item-content {
+            padding: 17px;
+        }
+        .item-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .description {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .price {
+            font-weight: bold;
+            margin-top: 7px;
+            color: #111827;
+        }
+        /* =========================
+           NO ITEMS
+        ========================= */
+        .no-items {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            color: #666;
+        }
+        .no-search-result {
+            display: none;
+            background: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 10px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+        /* =========================
+           MOBILE
+        ========================= */
+        @media (max-width: 600px) {
+            .header {
+                padding: 22px 15px;
             }
-
-        });
-
+            .header h1 {
+                font-size: 25px;
+            }
+            .category-title {
+                font-size: 22px;
+            }
+            .items {
+                grid-template-columns: 1fr;
+            }
+            .item-image {
+                height: 210px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- =========================
+     HOTEL HEADER
+========================= -->
+<div class="header">
+    {% if hotel.logo %}
+        <img
+            src="{{ url_for(
+                'static',
+                filename='images/' + hotel.logo
+            ) }}"
+            class="hotel-logo"
+            alt="{{ hotel.name }}"
+        >
+    {% endif %}
+    <h1>
+        {{ hotel.name }}
+    </h1>
+    {% if hotel.address %}
+        <p>
+            📍 {{ hotel.address }}
+        </p>
+    {% endif %}
+    {% if hotel.phone %}
+        <p>
+            📞 {{ hotel.phone }}
+        </p>
+    {% endif %}
+</div>
+<!-- =========================
+     MAIN
+========================= -->
+<div class="container">
+    {% if foods %}
+        <!-- SEARCH -->
+        <div class="search-box">
+            <input
+                type="text"
+                id="menuSearch"
+                placeholder="🔍 Search food..."
+                autocomplete="off"
+            >
+        </div>
+        <!-- NO SEARCH RESULT -->
+        <div
+            class="no-search-result"
+            id="noSearchResult"
+        >
+            <h3>
+                No food found
+            </h3>
+            <p>
+                Try another food name.
+            </p>
+        </div>
+        <!-- =========================
+             CATEGORIES
+        ========================= -->
+        {% set categories = [] %}
+        {% for food in foods %}
+            {% if
+                food.category_name
+                and
+                food.category_name not in categories
+            %}
+                {% set dummy =
+                    categories.append(
+                        food.category_name
+                    )
+                %}
+            {% endif %}
+        {% endfor %}
+        <!-- =========================
+             REAL CATEGORIES
+        ========================= -->
+        {% for category in categories %}
+            <div
+                class="category"
+                data-category="{{ category }}"
+            >
+                <h2 class="category-title">
+                    {{ category }}
+                </h2>
+                <div class="items">
+                    {% for food in foods %}
+                        {% if
+                            food.category_name
+                            == category
+                        %}
+                            <div
+                                class="item"
+                                data-name="{{ food.name|lower }}"
+                                data-description="{{ (food.description or '')|lower }}"
+                            >
+                                {% if food.image %}
+                                    <img
+                                        src="{{ url_for(
+                                            'static',
+                                            filename='images/' + food.image
+                                        ) }}"
+                                        class="item-image"
+                                        alt="{{ food.name }}"
+                                    >
+                                {% endif %}
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        {{ food.name }}
+                                    </div>
+                                    {% if food.description %}
+                                        <div class="description">
+                                            {{ food.description }}
+                                        </div>
+                                    {% endif %}
+                                    {% for size in food_sizes %}
+                                        {% if
+                                            size.menu_item_id
+                                            == food.id
+                                        %}
+                                            <div class="price">
+                                                {{ size.size_name }}:
+                                                ₹{{ "%.2f"|format(
+                                                    size.price
+                                                ) }}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <!-- =========================
+             OTHER / UNCATEGORIZED
+        ========================= -->
+        {% set has_uncategorized = false %}
+        {% for food in foods %}
+            {% if not food.category_name %}
+                {% set has_uncategorized = true %}
+            {% endif %}
+        {% endfor %}
+        {% if has_uncategorized %}
+            <div
+                class="category"
+                data-category="Other"
+            >
+                <h2 class="category-title">
+                    Other
+                </h2>
+                <div class="items">
+                    {% for food in foods %}
+                        {% if not food.category_name %}
+                            <div
+                                class="item"
+                                data-name="{{ food.name|lower }}"
+                                data-description="{{ (food.description or '')|lower }}"
+                            >
+                                {% if food.image %}
+                                    <img
+                                        src="{{ url_for(
+                                            'static',
+                                            filename='images/' + food.image
+                                        ) }}"
+                                        class="item-image"
+                                        alt="{{ food.name }}"
+                                    >
+                                {% endif %}
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        {{ food.name }}
+                                    </div>
+                                    {% if food.description %}
+                                        <div class="description">
+                                            {{ food.description }}
+                                        </div>
+                                    {% endif %}
+                                    {% for size in food_sizes %}
+                                        {% if
+                                            size.menu_item_id
+                                            == food.id
+                                        %}
+                                            <div class="price">
+                                                {{ size.size_name }}:
+                                                ₹{{ "%.2f"|format(
+                                                    size.price
+                                                ) }}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="no-items">
+            <h2>
+                Menu Empty
+            </h2>
+            <p>
+                Abhi is hotel ke menu me
+                koi item available nahi hai.
+            </p>
+        </div>
+    {% endif %}
+</div>
+<!-- =========================
+     SEARCH SCRIPT
+========================= -->
+<script>
+    const searchInput =
+        document.getElementById(
+            "menuSearch"
+        );
+    const noSearchResult =
+        document.getElementById(
+            "noSearchResult"
+        );
+    if (searchInput) {
+        searchInput.addEventListener(
+            "input",
+            function () {
+                const searchText =
+                    this.value
+                    .toLowerCase()
+                    .trim();
+                const categories =
+                    document.querySelectorAll(
+                        ".category"
+                    );
+                let totalVisible =
+                    0;
+                categories.forEach(
+                    function (category) {
+                        const items =
+                            category.querySelectorAll(
+                                ".item"
+                            );
+                        let categoryVisible =
+                            0;
+                        items.forEach(
+                            function (item) {
+                                const name =
+                                    item.dataset.name
+                                    || "";
+                                const description =
+                                    item.dataset.description
+                                    || "";
+                                const matches =
+                                    name.includes(
+                                        searchText
+                                    )
+                                    ||
+                                    description.includes(
+                                        searchText
+                                    );
+                                if (matches) {
+                                    item.style.display =
+                                        "";
+                                    categoryVisible++;
+                                    totalVisible++;
+                                } else {
+                                    item.style.display =
+                                        "none";
+                                }
+                            }
+                        );
+                        if (
+                            categoryVisible === 0
+                        ) {
+                            category.style.display =
+                                "none";
+                        } else {
+                            category.style.display =
+                                "";
+                        }
+                    }
+                );
+                if (
+                    searchText !== ""
+                    &&
+                    totalVisible === 0
+                ) {
+                    noSearchResult.style.display =
+                        "block";
+                } else {
+                    noSearchResult.style.display =
+                        "none";
+                }
+            }
+        );
     }
-
-
-    searchInput.addEventListener("input", function() {
-
-        updateMenu();
-
-    });
-
-
-    categoryButtons.forEach(function(button) {
-
-        button.addEventListener("click", function() {
-
-            selectedCategory =
-                button.dataset.category;
-
-
-            categoryButtons.forEach(function(btn) {
-
-                btn.classList.remove("active");
-
-            });
-
-
-            button.classList.add("active");
-
-
-            updateMenu();
-
-        });
-
-    });
-
 </script>
-
-
 </body>
-
 </html>
