@@ -22,7 +22,10 @@ import qrcode
 
 app = Flask(__name__)
 
-app.secret_key = "QR_HOTEL_MENU_SECRET_2026"
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "CHANGE_THIS_SECRET_KEY_2026"
+)
 
 
 # =========================================================
@@ -55,19 +58,11 @@ QR_FOLDER = os.path.join(
 # =========================================================
 # PUBLIC URL
 # =========================================================
-#
-# LOCAL TESTING:
-# http://192.168.29.196:5000
-#
-# PUBLIC DEPLOYMENT:
-# change this to your real domain
-#
-# Example:
-# https://yourdomain.com
-#
-# =========================================================
 
-PUBLIC_URL = "http://192.168.29.196:5000"
+PUBLIC_URL = os.environ.get(
+    "PUBLIC_URL",
+    "https://qr-hotel-menu.onrender.com"
+)
 
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -354,6 +349,98 @@ def init_db():
         )
     """)
 
+    # =====================================================
+    # DEFAULT SUPER ADMIN
+    # =====================================================
+
+    admin_username = os.environ.get(
+        "ADMIN_USERNAME",
+        "superadmin"
+    )
+
+    admin_password = os.environ.get(
+        "ADMIN_PASSWORD",
+        "Admin@12345"
+    )
+
+    existing_admin = conn.execute("""
+        SELECT id
+        FROM users
+        WHERE username = ?
+    """, (
+        admin_username,
+    )).fetchone()
+
+    if not existing_admin:
+
+        conn.execute("""
+            INSERT INTO users
+            (
+                hotel_id,
+                username,
+                password,
+                role
+            )
+            VALUES (?, ?, ?, 'super_admin')
+        """, (
+            None,
+            admin_username,
+            admin_password
+        ))
+
+    # =====================================================
+    # DEFAULT DEMO HOTEL
+    # =====================================================
+
+    demo_username = os.environ.get(
+        "DEMO_USERNAME",
+        "demo"
+    )
+
+    demo_password = os.environ.get(
+        "DEMO_PASSWORD",
+        "Demo@12345"
+    )
+
+    demo_hotel = conn.execute("""
+        SELECT id
+        FROM hotels
+        WHERE name = ?
+    """, (
+        "Demo Hotel",
+    )).fetchone()
+
+    if not demo_hotel:
+
+        cursor = conn.execute("""
+            INSERT INTO hotels
+            (
+                name,
+                address
+            )
+            VALUES (?, ?)
+        """, (
+            "Demo Hotel",
+            "Demo Address"
+        ))
+
+        demo_hotel_id = cursor.lastrowid
+
+        conn.execute("""
+            INSERT INTO users
+            (
+                hotel_id,
+                username,
+                password,
+                role
+            )
+            VALUES (?, ?, ?, 'hotel_admin')
+        """, (
+            demo_hotel_id,
+            demo_username,
+            demo_password
+        ))
+
     conn.commit()
 
     conn.close()
@@ -487,20 +574,13 @@ def super_admin():
 
     hotels = conn.execute("""
         SELECT
-
             hotels.*,
-
             users.id AS admin_id,
-
             users.username AS admin_username
-
         FROM hotels
-
         LEFT JOIN users
             ON users.hotel_id = hotels.id
-
            AND users.role = 'hotel_admin'
-
         ORDER BY hotels.id DESC
     """).fetchall()
 
@@ -637,6 +717,7 @@ def add_hotel():
             conn.close()
 
             if logo_name:
+
                 delete_image(
                     logo_name
                 )
@@ -743,6 +824,7 @@ def edit_hotel(hotel_id):
                 logo_name = new_logo
 
                 if old_logo:
+
                     delete_image(
                         old_logo
                     )
@@ -751,15 +833,10 @@ def edit_hotel(hotel_id):
             UPDATE hotels
 
             SET
-
                 name = ?,
-
                 logo = ?,
-
                 address = ?,
-
                 phone = ?,
-
                 email = ?
 
             WHERE id = ?
@@ -808,16 +885,11 @@ def change_password(user_id):
 
     user = conn.execute("""
         SELECT
-
             users.*,
-
             hotels.name AS hotel_name
-
         FROM users
-
         LEFT JOIN hotels
             ON users.hotel_id = hotels.id
-
         WHERE users.id = ?
     """, (
         user_id,
@@ -941,9 +1013,7 @@ def dashboard():
 
     foods = conn.execute("""
         SELECT
-
             menu_items.*,
-
             categories.name AS category_name
 
         FROM menu_items
@@ -964,7 +1034,6 @@ def dashboard():
 
     food_sizes = conn.execute("""
         SELECT
-
             item_sizes.*
 
         FROM item_sizes
@@ -1079,11 +1148,8 @@ def add_item():
 
             category_row = conn.execute("""
                 SELECT id
-
                 FROM categories
-
                 WHERE hotel_id = ?
-
                   AND LOWER(TRIM(name))
                       = LOWER(TRIM(?))
             """, (
@@ -1244,9 +1310,7 @@ def edit_item(item_id):
 
     food = conn.execute("""
         SELECT
-
             menu_items.*,
-
             categories.name AS category_name
 
         FROM menu_items
@@ -1274,9 +1338,7 @@ def edit_item(item_id):
 
     sizes = conn.execute("""
         SELECT *
-
         FROM item_sizes
-
         WHERE menu_item_id = ?
     """, (
         item_id,
@@ -1359,11 +1421,8 @@ def edit_item(item_id):
 
             category_row = conn.execute("""
                 SELECT id
-
                 FROM categories
-
                 WHERE hotel_id = ?
-
                   AND LOWER(TRIM(name))
                       = LOWER(TRIM(?))
             """, (
@@ -1399,13 +1458,9 @@ def edit_item(item_id):
             UPDATE menu_items
 
             SET
-
                 name = ?,
-
                 category_id = ?,
-
                 description = ?,
-
                 image = ?
 
             WHERE id = ?
@@ -1544,11 +1599,8 @@ def delete_item(item_id):
 
     food = conn.execute("""
         SELECT image
-
         FROM menu_items
-
         WHERE id = ?
-
           AND hotel_id = ?
     """, (
         item_id,
@@ -1662,9 +1714,7 @@ def hotel_menu(hotel_id):
 
     hotel = conn.execute("""
         SELECT *
-
         FROM hotels
-
         WHERE id = ?
     """, (
         hotel_id,
@@ -1678,27 +1728,18 @@ def hotel_menu(hotel_id):
 
     foods = conn.execute("""
         SELECT
-
             menu_items.id,
-
             menu_items.hotel_id,
-
             menu_items.category_id,
-
             menu_items.name,
-
             menu_items.description,
-
             menu_items.image,
-
             menu_items.available,
-
             categories.name AS category_name
 
         FROM menu_items
 
         LEFT JOIN categories
-
             ON menu_items.category_id =
                categories.id
 
@@ -1725,31 +1766,28 @@ def hotel_menu(hotel_id):
             categories.name COLLATE NOCASE,
 
             menu_items.name COLLATE NOCASE
+
     """, (
         hotel_id,
     )).fetchall()
 
     food_sizes = conn.execute("""
         SELECT
-
             item_sizes.id,
-
             item_sizes.menu_item_id,
-
             item_sizes.size_name,
-
             item_sizes.price
 
         FROM item_sizes
 
         INNER JOIN menu_items
-
             ON item_sizes.menu_item_id =
                menu_items.id
 
         WHERE menu_items.hotel_id = ?
 
         ORDER BY item_sizes.id
+
     """, (
         hotel_id,
     )).fetchall()
@@ -1861,9 +1899,7 @@ def qr_image(filename):
 # HEALTH CHECK
 # =========================================================
 
-@app.route(
-    "/health"
-)
+@app.route("/health")
 def health():
 
     return "OK"
@@ -1886,6 +1922,11 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=5000,
-        debug=True
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
+            )
+        ),
+        debug=False
     )
