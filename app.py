@@ -11,9 +11,9 @@ from flask import (
 import sqlite3
 import os
 import uuid
+import qrcode
 
 from werkzeug.utils import secure_filename
-import qrcode
 
 
 # =========================================================
@@ -22,19 +22,15 @@ import qrcode
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get(
-    "SECRET_KEY",
-    "CHANGE_THIS_SECRET_KEY_2026"
-)
+# SECRET KEY Render Environment Variable se aayegi
+app.secret_key = os.environ["SECRET_KEY"]
 
 
 # =========================================================
 # PATHS
 # =========================================================
 
-BASE_DIR = os.path.dirname(
-    os.path.abspath(__file__)
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DATABASE = os.path.join(
     BASE_DIR,
@@ -63,7 +59,6 @@ PUBLIC_URL = os.environ.get(
     "PUBLIC_URL",
     "https://qr-hotel-menu.onrender.com"
 )
-
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -109,9 +104,7 @@ def create_folders():
 
 def get_db():
 
-    conn = sqlite3.connect(
-        DATABASE
-    )
+    conn = sqlite3.connect(DATABASE)
 
     conn.row_factory = sqlite3.Row
 
@@ -154,9 +147,7 @@ def save_image(file):
     if not file.filename:
         return ""
 
-    if not allowed_file(
-        file.filename
-    ):
+    if not allowed_file(file.filename):
         return ""
 
     original_name = secure_filename(
@@ -353,15 +344,9 @@ def init_db():
     # DEFAULT SUPER ADMIN
     # =====================================================
 
-    admin_username = os.environ.get(
-        "ADMIN_USERNAME",
-        "superadmin"
-    )
+    admin_username = os.environ["ADMIN_USERNAME"]
 
-    admin_password = os.environ.get(
-        "ADMIN_PASSWORD",
-        "Admin@12345"
-    )
+    admin_password = os.environ["ADMIN_PASSWORD"]
 
     existing_admin = conn.execute("""
         SELECT id
@@ -831,14 +816,12 @@ def edit_hotel(hotel_id):
 
         conn.execute("""
             UPDATE hotels
-
             SET
                 name = ?,
                 logo = ?,
                 address = ?,
                 phone = ?,
                 email = ?
-
             WHERE id = ?
         """, (
             hotel_name,
@@ -941,9 +924,7 @@ def change_password(user_id):
 
         conn.execute("""
             UPDATE users
-
             SET password = ?
-
             WHERE id = ?
         """, (
             new_password,
@@ -1015,18 +996,11 @@ def dashboard():
         SELECT
             menu_items.*,
             categories.name AS category_name
-
         FROM menu_items
-
         LEFT JOIN categories
-            ON menu_items.category_id =
-               categories.id
-
-           AND categories.hotel_id =
-               menu_items.hotel_id
-
+            ON menu_items.category_id = categories.id
+           AND categories.hotel_id = menu_items.hotel_id
         WHERE menu_items.hotel_id = ?
-
         ORDER BY menu_items.id DESC
     """, (
         hotel_id,
@@ -1035,15 +1009,10 @@ def dashboard():
     food_sizes = conn.execute("""
         SELECT
             item_sizes.*
-
         FROM item_sizes
-
         JOIN menu_items
-            ON item_sizes.menu_item_id =
-               menu_items.id
-
+            ON item_sizes.menu_item_id = menu_items.id
         WHERE menu_items.hotel_id = ?
-
         ORDER BY item_sizes.id
     """, (
         hotel_id,
@@ -1124,10 +1093,6 @@ def add_item():
                 error="Item name is required."
             )
 
-        # -------------------------------------------------
-        # IMAGE
-        # -------------------------------------------------
-
         image_file = request.files.get(
             "image"
         )
@@ -1137,10 +1102,6 @@ def add_item():
         )
 
         conn = get_db()
-
-        # -------------------------------------------------
-        # CATEGORY
-        # -------------------------------------------------
 
         category_id = None
 
@@ -1177,10 +1138,6 @@ def add_item():
 
                 category_id = cursor.lastrowid
 
-        # -------------------------------------------------
-        # MENU ITEM
-        # -------------------------------------------------
-
         cursor = conn.execute("""
             INSERT INTO menu_items
             (
@@ -1201,10 +1158,6 @@ def add_item():
         ))
 
         item_id = cursor.lastrowid
-
-        # -------------------------------------------------
-        # PRICES
-        # -------------------------------------------------
 
         sizes = [
             (
@@ -1239,18 +1192,14 @@ def add_item():
 
         for size_name, price in sizes:
 
-            price = (
-                price or ""
-            ).strip()
+            price = (price or "").strip()
 
             if not price:
                 continue
 
             try:
 
-                price_value = float(
-                    price
-                )
+                price_value = float(price)
 
             except ValueError:
 
@@ -1312,18 +1261,11 @@ def edit_item(item_id):
         SELECT
             menu_items.*,
             categories.name AS category_name
-
         FROM menu_items
-
         LEFT JOIN categories
-            ON menu_items.category_id =
-               categories.id
-
-           AND categories.hotel_id =
-               menu_items.hotel_id
-
+            ON menu_items.category_id = categories.id
+           AND categories.hotel_id = menu_items.hotel_id
         WHERE menu_items.id = ?
-
           AND menu_items.hotel_id = ?
     """, (
         item_id,
@@ -1380,10 +1322,6 @@ def edit_item(item_id):
                 error="Item name is required."
             )
 
-        # -------------------------------------------------
-        # IMAGE
-        # -------------------------------------------------
-
         image_name = food["image"]
 
         image_file = request.files.get(
@@ -1410,10 +1348,6 @@ def edit_item(item_id):
                     delete_image(
                         old_image
                     )
-
-        # -------------------------------------------------
-        # CATEGORY
-        # -------------------------------------------------
 
         category_id = None
 
@@ -1450,21 +1384,14 @@ def edit_item(item_id):
 
                 category_id = cursor.lastrowid
 
-        # -------------------------------------------------
-        # UPDATE ITEM
-        # -------------------------------------------------
-
         conn.execute("""
             UPDATE menu_items
-
             SET
                 name = ?,
                 category_id = ?,
                 description = ?,
                 image = ?
-
             WHERE id = ?
-
               AND hotel_id = ?
         """, (
             name,
@@ -1475,21 +1402,12 @@ def edit_item(item_id):
             hotel_id
         ))
 
-        # -------------------------------------------------
-        # DELETE OLD PRICES
-        # -------------------------------------------------
-
         conn.execute("""
             DELETE FROM item_sizes
-
             WHERE menu_item_id = ?
         """, (
             item_id,
         ))
-
-        # -------------------------------------------------
-        # ADD NEW PRICES
-        # -------------------------------------------------
 
         sizes = [
             (
@@ -1524,18 +1442,14 @@ def edit_item(item_id):
 
         for size_name, price in sizes:
 
-            price = (
-                price or ""
-            ).strip()
+            price = (price or "").strip()
 
             if not price:
                 continue
 
             try:
 
-                price_value = float(
-                    price
-                )
+                price_value = float(price)
 
             except ValueError:
 
@@ -1611,9 +1525,7 @@ def delete_item(item_id):
 
         conn.execute("""
             DELETE FROM menu_items
-
             WHERE id = ?
-
               AND hotel_id = ?
         """, (
             item_id,
@@ -1659,11 +1571,8 @@ def toggle_item(item_id):
 
     food = conn.execute("""
         SELECT available
-
         FROM menu_items
-
         WHERE id = ?
-
           AND hotel_id = ?
     """, (
         item_id,
@@ -1680,11 +1589,8 @@ def toggle_item(item_id):
 
         conn.execute("""
             UPDATE menu_items
-
             SET available = ?
-
             WHERE id = ?
-
               AND hotel_id = ?
         """, (
             new_status,
@@ -1736,37 +1642,21 @@ def hotel_menu(hotel_id):
             menu_items.image,
             menu_items.available,
             categories.name AS category_name
-
         FROM menu_items
-
         LEFT JOIN categories
-            ON menu_items.category_id =
-               categories.id
-
-           AND categories.hotel_id =
-               menu_items.hotel_id
-
+            ON menu_items.category_id = categories.id
+           AND categories.hotel_id = menu_items.hotel_id
         WHERE menu_items.hotel_id = ?
-
           AND menu_items.available = 1
-
         ORDER BY
-
             CASE
-
                 WHEN categories.name IS NULL
                      OR TRIM(categories.name) = ''
-
                 THEN 1
-
                 ELSE 0
-
             END,
-
             categories.name COLLATE NOCASE,
-
             menu_items.name COLLATE NOCASE
-
     """, (
         hotel_id,
     )).fetchall()
@@ -1777,17 +1667,12 @@ def hotel_menu(hotel_id):
             item_sizes.menu_item_id,
             item_sizes.size_name,
             item_sizes.price
-
         FROM item_sizes
-
         INNER JOIN menu_items
             ON item_sizes.menu_item_id =
                menu_items.id
-
         WHERE menu_items.hotel_id = ?
-
         ORDER BY item_sizes.id
-
     """, (
         hotel_id,
     )).fetchall()
@@ -1827,19 +1712,11 @@ def generate_qr():
             url_for("login")
         )
 
-    # -----------------------------------------------------
-    # PUBLIC MENU URL
-    # -----------------------------------------------------
-
     menu_url = (
         PUBLIC_URL.rstrip("/")
         + "/menu/"
         + str(hotel_id)
     )
-
-    # -----------------------------------------------------
-    # QR
-    # -----------------------------------------------------
 
     qr = qrcode.QRCode(
         version=1,
@@ -1848,9 +1725,7 @@ def generate_qr():
         border=4
     )
 
-    qr.add_data(
-        menu_url
-    )
+    qr.add_data(menu_url)
 
     qr.make(
         fit=True
